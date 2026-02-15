@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/mixabyt/wsroutes"
 	"log"
 	"net/http"
-	"wsroutes"
 )
 
 var upgrader = websocket.Upgrader{
@@ -14,7 +14,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func t(c *wsroutes.Client, msg []byte) {
+func t(c *wsroutes.EventHandler, msg []byte) {
 	fmt.Println(string(msg))
 	c.Conn.WriteMessage(websocket.TextMessage, []byte("test"))
 }
@@ -22,6 +22,13 @@ func t(c *wsroutes.Client, msg []byte) {
 func main() {
 
 	ws := wsroutes.New("/ws", ":8080", upgrader)
+	ws.OnConnect(func(client *wsroutes.EventHandler, bytes []byte) {
+		fmt.Println("user connected")
+	})
+	ws.OnDisconnect(func(client *wsroutes.EventHandler, bytes []byte) {
+		fmt.Println("user disconnected")
+	})
+
 	ws.On("/hello", nil)
 	ws.On("/test", t)
 

@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-type HandlerFunc func(*Client, []byte)
+type HandlerFunc func(*EventHandler, []byte)
 type WsRoutes struct {
 	httpRoute string
 	port      string
@@ -15,6 +15,7 @@ type WsRoutes struct {
 	upgrader  websocket.Upgrader
 }
 
+// init Wsroutes struct
 func New(httpRoute, port string, upgrader websocket.Upgrader) *WsRoutes {
 	return &WsRoutes{
 		httpRoute: httpRoute,
@@ -31,6 +32,9 @@ func (ws *WsRoutes) validateRoute(route string) bool {
 
 }
 
+// route must be look like - /youpath
+//
+// call panic if route had invalid format
 func (ws *WsRoutes) On(route string, callback HandlerFunc) {
 	if !ws.validateRoute(route) {
 		panic("invalid route path: " + route)
@@ -39,6 +43,7 @@ func (ws *WsRoutes) On(route string, callback HandlerFunc) {
 	ws.routes[route] = callback
 }
 
+// calls when user connect
 func (ws *WsRoutes) OnConnect(callback HandlerFunc) {
 	_, exist := ws.routes["/connect"]
 	if exist {
@@ -46,6 +51,8 @@ func (ws *WsRoutes) OnConnect(callback HandlerFunc) {
 	}
 	ws.routes["/connect"] = callback
 }
+
+// function calls when user terminate websocket connection
 func (ws *WsRoutes) OnDisconnect(callback HandlerFunc) {
 	_, exist := ws.routes["/disconnect"]
 	if exist {
@@ -60,7 +67,7 @@ func (ws *WsRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Println("Upgrade error:", err)
 		return
 	}
-	client := &Client{Conn: conn}
+	client := &EventHandler{Conn: conn}
 
 	go client.readLoop(ws.routes)
 }

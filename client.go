@@ -5,11 +5,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Client struct {
+type EventHandler struct {
 	Conn *websocket.Conn
 }
 
-func (c *Client) readLoop(routes map[string]HandlerFunc) {
+func (c *EventHandler) readLoop(routes map[string]HandlerFunc) {
 	if handler, ok := routes["/connect"]; ok {
 		handler(c, nil)
 	}

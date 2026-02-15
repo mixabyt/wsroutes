@@ -1,4 +1,4 @@
-module wsroutes
+module github.com/mixabyt/wsroutes
 
 go 1.25.0
 
